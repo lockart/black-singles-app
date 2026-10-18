@@ -1,1 +1,457 @@
-PLACEHOLDER
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Black Singles</title>
+<style>
+:root {
+  --bg: #FDF6F0;
+  --heart: #8B1E3F;
+  --black: #111;
+  --text: #333;
+  --card: #fff;
+  --shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+header {
+  background: white;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo-img { height: 48px; }
+.nav { display: flex; gap: 8px; flex-wrap: wrap; }
+.nav button, .btn {
+  background: var(--heart);
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 24px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+}
+.nav button.active, .btn:hover { opacity: 0.9; }
+.container { max-width: 900px; margin: 0 auto; padding: 24px; }
+.page { display: none; }
+.page.active { display: block; }
+.card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+h1, h2 { color: var(--black); margin-bottom: 16px; }
+input, textarea, select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  font-size: 16px;
+}
+.auth-box { max-width: 400px; margin: 40px auto; text-align: center; }
+.auth-box img { height: 80px; margin-bottom: 20px; }
+.google-btn {
+  background: white;
+  color: #333;
+  border: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 12px;
+}
+.swipe-container {
+  position: relative;
+  height: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.profile-card {
+  width: 320px;
+  height: 420px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  padding: 20px;
+  text-align: center;
+  position: absolute;
+  transition: transform 0.3s;
+}
+.profile-card img.avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #eee;
+  margin-bottom: 12px;
+}
+.swipe-actions { display: flex; gap: 20px; justify-content: center; margin-top: 20px; }
+.swipe-actions button { width: 70px; height: 70px; border-radius: 50%; font-size: 28px; }
+.no-btn { background: #ddd; color: #666; }
+.yes-btn { background: var(--heart); }
+.feed-item, .message-item, .search-result { border-bottom: 1px solid #eee; padding: 12px 0; }
+.chat-box { height: 300px; overflow-y: auto; border: 1px solid #eee; border-radius: 12px; padding: 12px; margin-bottom: 12px; background: #fafafa; }
+.msg { margin: 8px 0; padding: 8px 12px; border-radius: 12px; max-width: 70%; }
+.msg.me { background: var(--heart); color: white; margin-left: auto; }
+.msg.them { background: #eee; }
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+<header id="appHeader" class="hidden">
+  <img src="logo.png" class="logo-img" alt="Black Singles">
+  <nav class="nav">
+    <button onclick="showPage('profile')">Profile</button>
+    <button onclick="showPage('account')">Account</button>
+    <button onclick="showPage('search')">Search</button>
+    <button onclick="showPage('feed')">Feed</button>
+    <button onclick="showPage('swipe')">Swipe</button>
+    <button onclick="showPage('messages')">Messages</button>
+    <button onclick="logout()">Logout</button>
+  </nav>
+</header>
+
+<div id="authPage" class="page active">
+  <div class="auth-box card">
+    <img src="logo.png" alt="Black Singles Group">
+    <h1>Black Singles</h1>
+    <p style="margin-bottom:20px;color:#666;">Find your match</p>
+    <div id="loginForm">
+      <input type="email" id="loginEmail" placeholder="Email">
+      <input type="password" id="loginPass" placeholder="Password">
+      <button class="btn" style="width:100%" onclick="login()">Sign In</button>
+      <button class="google-btn btn" onclick="googleSignIn()">Connect with Gmail</button>
+      <p style="margin-top:16px;">No account? <a href="#" onclick="showSignup()">Sign up</a></p>
+    </div>
+    <div id="signupForm" class="hidden">
+      <input type="text" id="signupName" placeholder="Full Name">
+      <input type="email" id="signupEmail" placeholder="Email">
+      <input type="password" id="signupPass" placeholder="Password">
+      <input type="text" id="signupLoc" placeholder="City, State or ZIP">
+      <button class="btn" style="width:100%" onclick="signup()">Create Account</button>
+      <p style="margin-top:16px;">Have account? <a href="#" onclick="showLogin()">Sign in</a></p>
+    </div>
+  </div>
+</div>
+
+<div id="profilePage" class="page container">
+  <h2>My Profile</h2>
+  <div class="card">
+    <div style="text-align:center;margin-bottom:16px;">
+      <div class="avatar" style="width:100px;height:100px;border-radius:50%;background:#eee;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:40px;">👤</div>
+    </div>
+    <input type="text" id="profName" placeholder="Name">
+    <input type="number" id="profAge" placeholder="Age">
+    <input type="text" id="profLoc" placeholder="City, State or ZIP">
+    <textarea id="profBio" placeholder="Bio" rows="3"></textarea>
+    <button class="btn" onclick="saveProfile()">Save Profile</button>
+  </div>
+</div>
+
+<div id="accountPage" class="page container">
+  <h2>Account</h2>
+  <div class="card">
+    <p>Email: <span id="accEmail"></span></p>
+    <button class="btn" onclick="logout()">Logout</button>
+    <button class="btn" style="background:#999;margin-top:12px;" onclick="deleteAccount()">Delete Account</button>
+  </div>
+</div>
+
+<div id="searchPage" class="page container">
+  <h2>Search</h2>
+  <input type="text" id="searchInput" placeholder="City, State or ZIP code">
+  <button class="btn" onclick="doSearch()">Search</button>
+  <div id="searchResults"></div>
+</div>
+
+<div id="feedPage" class="page container">
+  <h2>Public Feed</h2>
+  <div id="feedList"></div>
+</div>
+
+<div id="swipePage" class="page container">
+  <h2>Discover</h2>
+  <div class="swipe-container">
+    <div id="swipeCard" class="profile-card">
+      <div class="avatar" style="width:140px;height:140px;border-radius:50%;background:#eee;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:60px;">👤</div>
+      <h3 id="swipeName"></h3>
+      <p id="swipeAgeLoc"></p>
+      <p id="swipeBio" style="margin-top:12px;color:#666;"></p>
+    </div>
+  </div>
+  <div class="swipe-actions">
+    <button class="no-btn" onclick="swipeLeft()">✕</button>
+    <button class="yes-btn" onclick="swipeRight()">♥</button>
+  </div>
+  <p id="swipeMsg" style="text-align:center;margin-top:16px;color:#666;"></p>
+</div>
+
+<div id="messagesPage" class="page container">
+  <h2>Messages</h2>
+  <div id="friendsList"></div>
+  <div id="chatArea" class="hidden">
+    <h3 id="chatWith"></h3>
+    <div id="chatBox" class="chat-box"></div>
+    <input type="text" id="chatInput" placeholder="Type a message...">
+    <button class="btn" onclick="sendMessage()">Send</button>
+    <button class="btn" style="background:#999;" onclick="closeChat()">Back</button>
+  </div>
+</div>
+
+<script>
+let currentUser = null;
+let users = JSON.parse(localStorage.getItem('bs_users') || '[]');
+let chats = JSON.parse(localStorage.getItem('bs_chats') || '{}');
+let currentChat = null;
+let swipeIndex = 0;
+let swipeCandidates = [];
+
+const mockUsers = [
+  { id: 'm1', name: 'Aisha Johnson', age: 28, location: 'Atlanta, GA', bio: 'Love travel and good food.', email: 'aisha@example.com' },
+  { id: 'm2', name: 'Marcus Williams', age: 32, location: 'Houston, TX', bio: 'Fitness and music.', email: 'marcus@example.com' },
+  { id: 'm3', name: 'Keisha Brown', age: 25, location: 'Chicago, IL', bio: 'Artist and dreamer.', email: 'keisha@example.com' },
+  { id: 'm4', name: 'Jamal Davis', age: 30, location: 'New York, NY', bio: 'Entrepreneur.', email: 'jamal@example.com' },
+  { id: 'm5', name: 'Nia Thompson', age: 27, location: 'Los Angeles, CA', bio: 'Yoga and books.', email: 'nia@example.com' }
+];
+
+function init() {
+  if (!users.length) {
+    users = mockUsers.map(u => ({...u, password: 'pass', friends: [], likes: []}));
+    localStorage.setItem('bs_users', JSON.stringify(users));
+  }
+  const saved = localStorage.getItem('bs_current');
+  if (saved) {
+    currentUser = JSON.parse(saved);
+    showApp();
+  }
+}
+
+function showLogin() { document.getElementById('loginForm').classList.remove('hidden'); document.getElementById('signupForm').classList.add('hidden'); }
+function showSignup() { document.getElementById('loginForm').classList.add('hidden'); document.getElementById('signupForm').classList.remove('hidden'); }
+
+function googleSignIn() {
+  const email = prompt('Enter Gmail address (demo):') || 'user@gmail.com';
+  const name = email.split('@')[0];
+  let user = users.find(u => u.email === email);
+  if (!user) {
+    user = { id: Date.now().toString(), name, email, password: '', age: 25, location: '', bio: '', friends: [], likes: [] };
+    users.push(user);
+    localStorage.setItem('bs_users', JSON.stringify(users));
+  }
+  currentUser = user;
+  localStorage.setItem('bs_current', JSON.stringify(currentUser));
+  showApp();
+}
+
+function signup() {
+  const name = document.getElementById('signupName').value;
+  const email = document.getElementById('signupEmail').value;
+  const pass = document.getElementById('signupPass').value;
+  const loc = document.getElementById('signupLoc').value;
+  if (!name || !email || !pass) return alert('Fill all fields');
+  if (users.find(u => u.email === email)) return alert('Email exists');
+  const user = { id: Date.now().toString(), name, email, password: pass, age: 25, location: loc, bio: '', friends: [], likes: [] };
+  users.push(user);
+  localStorage.setItem('bs_users', JSON.stringify(users));
+  currentUser = user;
+  localStorage.setItem('bs_current', JSON.stringify(currentUser));
+  showApp();
+}
+
+function login() {
+  const email = document.getElementById('loginEmail').value;
+  const pass = document.getElementById('loginPass').value;
+  const user = users.find(u => u.email === email && u.password === pass);
+  if (!user) return alert('Invalid credentials');
+  currentUser = user;
+  localStorage.setItem('bs_current', JSON.stringify(currentUser));
+  showApp();
+}
+
+function showApp() {
+  document.getElementById('authPage').classList.remove('active');
+  document.getElementById('appHeader').classList.remove('hidden');
+  showPage('swipe');
+  loadProfile();
+  loadFeed();
+  loadFriends();
+}
+
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(page + 'Page').classList.add('active');
+  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+  if (page === 'swipe') loadSwipe();
+  if (page === 'feed') loadFeed();
+  if (page === 'messages') loadFriends();
+  if (page === 'account') document.getElementById('accEmail').textContent = currentUser.email;
+}
+
+function loadProfile() {
+  if (!currentUser) return;
+  document.getElementById('profName').value = currentUser.name || '';
+  document.getElementById('profAge').value = currentUser.age || '';
+  document.getElementById('profLoc').value = currentUser.location || '';
+  document.getElementById('profBio').value = currentUser.bio || '';
+}
+
+function saveProfile() {
+  currentUser.name = document.getElementById('profName').value;
+  currentUser.age = document.getElementById('profAge').value;
+  currentUser.location = document.getElementById('profLoc').value;
+  currentUser.bio = document.getElementById('profBio').value;
+  const idx = users.findIndex(u => u.id === currentUser.id);
+  if (idx >= 0) users[idx] = currentUser;
+  localStorage.setItem('bs_users', JSON.stringify(users));
+  localStorage.setItem('bs_current', JSON.stringify(currentUser));
+  alert('Profile saved');
+}
+
+function logout() {
+  currentUser = null;
+  localStorage.removeItem('bs_current');
+  document.getElementById('appHeader').classList.add('hidden');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('authPage').classList.add('active');
+  showLogin();
+}
+
+function deleteAccount() {
+  if (!confirm('Delete account?')) return;
+  users = users.filter(u => u.id !== currentUser.id);
+  localStorage.setItem('bs_users', JSON.stringify(users));
+  logout();
+}
+
+function doSearch() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const results = users.filter(u => u.id !== currentUser.id && (u.location || '').toLowerCase().includes(q));
+  const div = document.getElementById('searchResults');
+  div.innerHTML = results.length ? results.map(u => `
+    <div class="search-result card">
+      <strong>${u.name}</strong> (${u.age || '?'}) - ${u.location}<br>
+      <small>${u.bio || ''}</small>
+    </div>
+  `).join('') : '<p>No results</p>';
+}
+
+function loadFeed() {
+  const posts = [
+    { user: 'Aisha Johnson', text: 'Just got back from Miami! The beach was amazing 🌊' },
+    { user: 'Marcus Williams', text: 'Who wants to hit the gym this weekend?' },
+    { user: 'Keisha Brown', text: 'New art piece finished. Feeling creative!' },
+    { user: 'Nia Thompson', text: 'Reading a great book. Any recommendations?' }
+  ];
+  document.getElementById('feedList').innerHTML = posts.map(p => `
+    <div class="feed-item card">
+      <strong>${p.user}</strong><br>${p.text}
+    </div>
+  `).join('');
+}
+
+function loadSwipe() {
+  swipeCandidates = users.filter(u => u.id !== currentUser.id && !currentUser.friends.includes(u.id));
+  swipeIndex = 0;
+  showNextSwipe();
+}
+
+function showNextSwipe() {
+  if (swipeIndex >= swipeCandidates.length) {
+    document.getElementById('swipeName').textContent = 'No more profiles';
+    document.getElementById('swipeAgeLoc').textContent = '';
+    document.getElementById('swipeBio').textContent = 'Check back later or search!';
+    document.getElementById('swipeMsg').textContent = '';
+    return;
+  }
+  const p = swipeCandidates[swipeIndex];
+  document.getElementById('swipeName').textContent = p.name;
+  document.getElementById('swipeAgeLoc').textContent = `${p.age || ''} • ${p.location || ''}`;
+  document.getElementById('swipeBio').textContent = p.bio || '';
+  document.getElementById('swipeMsg').textContent = '';
+}
+
+function swipeLeft() {
+  swipeIndex++;
+  showNextSwipe();
+}
+
+function swipeRight() {
+  if (swipeIndex >= swipeCandidates.length) return;
+  const p = swipeCandidates[swipeIndex];
+  if (!currentUser.friends.includes(p.id)) currentUser.friends.push(p.id);
+  const other = users.find(u => u.id === p.id);
+  if (other && !other.friends.includes(currentUser.id)) other.friends.push(currentUser.id);
+  const idx = users.findIndex(u => u.id === currentUser.id);
+  if (idx >= 0) users[idx] = currentUser;
+  localStorage.setItem('bs_users', JSON.stringify(users));
+  localStorage.setItem('bs_current', JSON.stringify(currentUser));
+  document.getElementById('swipeMsg').textContent = `You and ${p.name} are now friends!`;
+  swipeIndex++;
+  setTimeout(showNextSwipe, 800);
+}
+
+function loadFriends() {
+  const friends = users.filter(u => currentUser.friends.includes(u.id));
+  document.getElementById('friendsList').innerHTML = friends.length ? friends.map(f => `
+    <div class="message-item card" onclick="openChat('${f.id}', '${f.name}')" style="cursor:pointer;">
+      <strong>${f.name}</strong>
+    </div>
+  `).join('') : '<p>No friends yet. Swipe right to connect!</p>';
+}
+
+function openChat(id, name) {
+  currentChat = id;
+  document.getElementById('chatWith').textContent = name;
+  document.getElementById('friendsList').classList.add('hidden');
+  document.getElementById('chatArea').classList.remove('hidden');
+  renderChat();
+}
+
+function closeChat() {
+  document.getElementById('friendsList').classList.remove('hidden');
+  document.getElementById('chatArea').classList.add('hidden');
+  currentChat = null;
+}
+
+function renderChat() {
+  if (!currentChat) return;
+  const key = [currentUser.id, currentChat].sort().join('_');
+  const msgs = chats[key] || [];
+  document.getElementById('chatBox').innerHTML = msgs.map(m => `
+    <div class="msg ${m.from === currentUser.id ? 'me' : 'them'}">${m.text}</div>
+  `).join('');
+  document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
+}
+
+function sendMessage() {
+  const text = document.getElementById('chatInput').value.trim();
+  if (!text || !currentChat) return;
+  const key = [currentUser.id, currentChat].sort().join('_');
+  if (!chats[key]) chats[key] = [];
+  chats[key].push({ from: currentUser.id, text, time: Date.now() });
+  localStorage.setItem('bs_chats', JSON.stringify(chats));
+  document.getElementById('chatInput').value = '';
+  renderChat();
+}
+
+init();
+</script>
+</body>
+</html>
